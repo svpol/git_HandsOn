@@ -1,90 +1,69 @@
-import sys
-import re
+#!/usr/bin/env python
+
+#imports
+import sys, re
 from argparse import ArgumentParser
 
-def main():
-    """
-    Classifies a given nucleotide sequence as DNA or RNA, optionally searches for a motif, 
-    and calculates nucleotide composition percentages.
-    """
-    parser = ArgumentParser(description='Classify a sequence as DNA or RNA')
-    parser.add_argument("-s", "--seq", type=str, required=True, help="Input nucleotide sequence")
-    parser.add_argument("-m", "--motif", type=str, required=False, help="Motif to search in the sequence")
-    parser.add_argument("-p", "--percentage", action="store_true", help="Enable nucleotide percentage calculation")
-    
-    if len(sys.argv) == 1:
-        parser.print_help()
-        sys.exit(1)
-    
-    args = parser.parse_args()
-    args.seq = args.seq.upper()
-    
-    classify_sequence(args)
+parser = ArgumentParser(description = 'Classify a sequence as DNA or RNA')
+parser.add_argument("-s", "--seq", type = str, required = True, help = "Input sequence")
+parser.add_argument("-m", "--motif", type = str, required = False, help = "Motif")
+parser.add_argument("-p", "--percentage", action="store_true", help="Enable nucleotide percentage calculation")
 
-def classify_sequence(args):
-    """
-    Determines whether the given sequence is DNA or RNA.
-    Also performs optional motif search and nucleotide percentage calculation.
-    
-    Args:
-        args (Namespace): Parsed command-line arguments containing sequence, motif, and percentage flag.
-    """
-    DNA = RNA = False
-    
-    if re.search(r'^[ACGTU]+$', args.seq):
-        if 'T' in args.seq and 'U' not in args.seq:
-            print('The sequence is DNA')
-            DNA = True
-        elif 'U' in args.seq and 'T' not in args.seq:
-            print('The sequence is RNA')
-            RNA = True
-        elif 'T' in args.seq and 'U' in args.seq:
-            print('The sequence is not DNA nor RNA')
-        else:
-            print('The sequence can be DNA or RNA')
-            DNA = RNA = True
-    else:
+#parse arguments
+if len(sys.argv) == 1:
+    parser.print_help()
+    sys.exit(1)
+
+args = parser.parse_args()
+
+args.seq = args.seq.upper()                 
+
+
+DNA = False
+RNA = False
+
+#Check if seq is DNA or RNA
+if re.search('^[ACGTU]+$', args.seq):
+    if re.search('T', args.seq) and not re.search('U', args.seq):
+        print ('The sequence is DNA')
+        DNA = True
+    elif re.search('U', args.seq) and not re.search('T', args.seq):
+        print ('The sequence is RNA')
+        RNA = True
+    elif re.search('T', args.seq) and re.search('U', args.seq):
         print('The sequence is not DNA nor RNA')
-        return
-    
-    if args.motif:
-        search_motif(args.seq, args.motif)
-    
-    if args.percentage:
-        calculate_nucleotide_percentage(args.seq, DNA, RNA)
-
-def search_motif(sequence, motif):
-    """
-    Searches for a specified motif within the sequence and prints the result.
-    
-    Args:
-        sequence (str): The nucleotide sequence.
-        motif (str): The motif to search for in the sequence.
-    """
-    motif = motif.upper()
-    print(f'Motif search enabled: looking for motif "{motif}" in sequence "{sequence}"... ', end='')
-    if re.search(motif, sequence):
-        print("FOUND")
     else:
-        print("NOT FOUND")
-
-def calculate_nucleotide_percentage(sequence, is_dna, is_rna):
-    """
-    Calculates and prints the nucleotide composition percentages if the sequence is DNA or RNA.
+        print ('The sequence can be DNA or RNA')
+        DNA = True
+        RNA = True
+else:
+    print ('The sequence is not DNA nor RNA')
     
-    Args:
-        sequence (str): The nucleotide sequence.
-        is_dna (bool): Flag indicating whether the sequence is classified as DNA.
-        is_rna (bool): Flag indicating whether the sequence is classified as RNA.
-    """
-    if not (is_dna or is_rna):
+# Motif search
+if args.motif:
+    args.motif = args.motif.upper()
+    print(f'Motif search enabled: looking for motif "{args.motif}" in sequence "{args.seq}"... ', end = '')
+    if re.search(args.motif, args.seq):
+        print("FOUND") # if motif is found print FOUND
+    else:
+        print("NOT FOUND") # if motif is not found print NOT FOUND
+        
+# Percentage calculation
+if args.percentage:
+    nucleotides = {}
+    for letter in set(args.seq):
+        nucleotides[letter] = 0
+    if DNA == True or RNA == True:
+        for i in args.seq:
+    	    for k in nucleotides.keys():
+    	        if i == k:
+    	            nucleotides[k] += 1
+        print(f'\nNucleotide percentage:')  
+        for key in nucleotides:
+            print(f'{key}\t{round(nucleotides[key]/len(args.seq), 4)*100}')
+    else:
         print('Percentage calculation is non-applicable.')
-        return
-    
-    nucleotide_counts = {nt: sequence.count(nt) for nt in set(sequence)}
-    print('\nNucleotide percentage:')
-    for nt, count in nucleotide_counts.items():
-        print(f'{nt}\t{round((count / len(sequence)) * 100, 4)}%')
-
-if __name__ == "__main__":
-    main()
+        
+        
+        
+        
