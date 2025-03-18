@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+
+#imports
 import sys, re
 from argparse import ArgumentParser
 
@@ -6,6 +9,7 @@ parser.add_argument("-s", "--seq", type = str, required = True, help = "Input se
 parser.add_argument("-m", "--motif", type = str, required = False, help = "Motif")
 parser.add_argument("-p", "--percentage", action="store_true", help="Enable nucleotide percentage calculation")
 
+#parse arguments
 if len(sys.argv) == 1:
     parser.print_help()
     sys.exit(1)
@@ -18,7 +22,7 @@ args.seq = args.seq.upper()
 DNA = False
 RNA = False
 
-
+#Check if seq is DNA or RNA
 if re.search('^[ACGTU]+$', args.seq):
     if re.search('T', args.seq) and not re.search('U', args.seq):
         print ('The sequence is DNA')
@@ -40,9 +44,9 @@ if args.motif:
     args.motif = args.motif.upper()
     print(f'Motif search enabled: looking for motif "{args.motif}" in sequence "{args.seq}"... ', end = '')
     if re.search(args.motif, args.seq):
-        print("FOUND")
+        print("FOUND") # if motif is found print FOUND
     else:
-        print("NOT FOUND")
+        print("NOT FOUND") # if motif is not found print NOT FOUND
         
 # Percentage calculation
 if args.percentage:
